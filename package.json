@@ -1,0 +1,15 @@
+{
+  "name": "clocktower-assistant",
+  "version": "1.0.0",
+  "description": "Virtual Blood on the Clocktower game manager",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "check": "node --check server.js && node --check public/app.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "socket.io": "^4.7.5"
+  }
+}
