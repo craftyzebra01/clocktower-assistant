@@ -43,6 +43,7 @@ label {
 }
 
 input, textarea, button, select {
+input, textarea, button {
   width: 100%;
   border-radius: 8px;
   border: 1px solid #49577f;

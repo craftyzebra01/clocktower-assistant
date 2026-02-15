@@ -7,9 +7,7 @@ A lightweight web app to run a **Blood on the Clocktower** game virtually.
 - Host a game and generate an invite code/link
 - Friends join using room code
 - Select and edit the role pool
-- Randomly generate a role pool for a chosen player count
 - Assign roles to players
-- Randomly assign roles to all players
 - Track alive/dead status
 - Run phase flow (night/day progression)
 - Keep storyteller notes in a game log
