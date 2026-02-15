@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Clocktower Assistant</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header>
+      <h1>Blood on the Clocktower - Virtual Host</h1>
+      <p>Create a room, pick roles, invite players, and run the game flow.</p>
+    </header>
+
+    <main>
+      <section id="connect-card" class="card">
+        <h2>Host or Join</h2>
+        <div class="grid-2">
+          <div>
+            <h3>Host a new game</h3>
+            <label>Host name <input id="host-name" placeholder="Storyteller" /></label>
+            <button id="create-game">Create Game</button>
+          </div>
+          <div>
+            <h3>Join an existing game</h3>
+            <label>Your name <input id="join-name" placeholder="Player name" /></label>
+            <label>Game code <input id="join-code" placeholder="ABC123" /></label>
+            <button id="join-game">Join Game</button>
+          </div>
+        </div>
+        <p id="status" class="status"></p>
+      </section>
+
+      <section id="game-card" class="card hidden">
+        <div class="room-row">
+          <h2>Game <span id="game-id"></span></h2>
+          <button id="copy-link">Copy Invite Link</button>
+        </div>
+
+        <div class="grid-2">
+          <div>
+            <h3>Game Overview</h3>
+            <p><strong>Host:</strong> <span id="host"></span></p>
+            <p><strong>Status:</strong> <span id="game-status"></span></p>
+            <p><strong>Phase:</strong> <span id="game-phase"></span></p>
+            <div class="controls host-only">
+              <button id="start-game">Start Game</button>
+              <button id="next-phase">Next Phase</button>
+            </div>
+          </div>
+          <div>
+            <h3>Role Setup</h3>
+            <label>Selected roles (comma separated)</label>
+            <textarea id="roles" rows="6"></textarea>
+            <div class="controls host-only">
+              <button id="save-roles">Save Roles</button>
+              <button id="random-assign">Random Assign Roles</button>
+            </div>
+            <div class="randomize-row host-only">
+              <input id="player-count" type="number" min="1" max="20" placeholder="Player count" />
+              <button id="randomize-pool">Randomize Pool</button>
+            </div>
+          </div>
+        </div>
+
+        <h3>Players</h3>
+        <div id="players"></div>
+
+        <h3>Storyteller Notes</h3>
+        <div class="notes-row host-only">
+          <input id="log-input" placeholder="Add note: nominations, executions, reminders..." />
+          <button id="add-log">Add</button>
+        </div>
+        <ul id="log"></ul>
+      </section>
+    </main>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
