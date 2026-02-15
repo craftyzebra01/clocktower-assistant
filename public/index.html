@@ -52,6 +52,14 @@
             <h3>Role Setup</h3>
             <label>Selected roles (comma separated)</label>
             <textarea id="roles" rows="6"></textarea>
+            <div class="controls host-only">
+              <button id="save-roles">Save Roles</button>
+              <button id="random-assign">Random Assign Roles</button>
+            </div>
+            <div class="randomize-row host-only">
+              <input id="player-count" type="number" min="1" max="20" placeholder="Player count" />
+              <button id="randomize-pool">Randomize Pool</button>
+            </div>
             <button id="save-roles" class="host-only">Save Roles</button>
           </div>
         </div>

@@ -37,6 +37,28 @@ function makeId(size = 6) {
   return out;
 }
 
+function shuffle(input) {
+  const arr = [...input];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function rolePoolForCount(playerCount, availableRoles) {
+  const count = Math.max(1, Math.min(Number(playerCount) || 1, 20));
+  const source = availableRoles?.length ? availableRoles : DEFAULT_ROLES;
+
+  if (source.length >= count) return shuffle(source).slice(0, count);
+
+  const out = [];
+  while (out.length < count) {
+    out.push(...shuffle(source));
+  }
+  return out.slice(0, count);
+}
+
 function createGame(hostSocket, hostName, selectedRoles) {
   let id = makeId();
   while (games.has(id)) id = makeId();
@@ -143,6 +165,39 @@ io.on('connection', (socket) => {
 
     game.selectedRoles = roles;
     game.log.push({ ts: Date.now(), text: `Roles updated (${roles.length} selected).` });
+    broadcastState(game);
+    cb?.({ ok: true });
+  });
+
+  socket.on('game:randomizeRolePool', ({ gameId, playerCount }, cb) => {
+    const game = games.get(String(gameId || '').toUpperCase().trim());
+    if (!game) return cb?.({ ok: false, message: 'Game not found.' });
+    if (!hostOnly(socket, game)) return cb?.({ ok: false, message: 'Host only action.' });
+
+    const requestedCount = Number(playerCount) || game.players.length || 1;
+    const roles = rolePoolForCount(requestedCount, DEFAULT_ROLES);
+
+    game.selectedRoles = roles;
+    game.log.push({ ts: Date.now(), text: `Randomized role pool for ${requestedCount} players.` });
+    broadcastState(game);
+    cb?.({ ok: true, selectedRoles: roles });
+  });
+
+  socket.on('game:randomAssignRoles', ({ gameId }, cb) => {
+    const game = games.get(String(gameId || '').toUpperCase().trim());
+    if (!game) return cb?.({ ok: false, message: 'Game not found.' });
+    if (!hostOnly(socket, game)) return cb?.({ ok: false, message: 'Host only action.' });
+
+    if (!game.players.length) return cb?.({ ok: false, message: 'No players to assign roles.' });
+
+    const roles = rolePoolForCount(game.players.length, game.selectedRoles);
+    const shuffledRoles = shuffle(roles);
+
+    game.players.forEach((player, index) => {
+      player.role = shuffledRoles[index] || null;
+    });
+
+    game.log.push({ ts: Date.now(), text: `Randomly assigned roles to ${game.players.length} players.` });
     broadcastState(game);
     cb?.({ ok: true });
   });

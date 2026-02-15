@@ -27,6 +27,9 @@ const els = {
   startGame: $('start-game'),
   nextPhase: $('next-phase'),
   saveRoles: $('save-roles'),
+  randomAssign: $('random-assign'),
+  playerCount: $('player-count'),
+  randomizePool: $('randomize-pool'),
   logInput: $('log-input'),
   addLog: $('add-log')
 };
@@ -63,6 +66,10 @@ function render() {
   els.gameStatus.textContent = game.status;
   els.gamePhase.textContent = `${game.phase} (Day ${game.day || '-'})`;
   els.roles.value = game.selectedRoles.join(', ');
+
+  if (!els.playerCount.value) {
+    els.playerCount.value = game.players.length || 1;
+  }
 
   document.querySelectorAll('.host-only').forEach((node) => {
     node.style.display = isHost() ? '' : 'none';
@@ -154,6 +161,18 @@ els.saveRoles.addEventListener('click', () => {
     .filter(Boolean);
 
   socket.emit('game:updateRoles', { gameId: state.game.id, selectedRoles }, callbackStatus);
+});
+
+els.randomizePool.addEventListener('click', () => {
+  if (!state.game) return;
+  const playerCount = Number(els.playerCount.value) || state.game.players.length || 1;
+
+  socket.emit('game:randomizeRolePool', { gameId: state.game.id, playerCount }, callbackStatus);
+});
+
+els.randomAssign.addEventListener('click', () => {
+  if (!state.game) return;
+  socket.emit('game:randomAssignRoles', { gameId: state.game.id }, callbackStatus);
 });
 
 els.startGame.addEventListener('click', () => {

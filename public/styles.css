@@ -42,6 +42,7 @@ label {
   margin-bottom: 0.5rem;
 }
 
+input, textarea, button, select {
 input, textarea, button {
   width: 100%;
   border-radius: 8px;
@@ -75,6 +76,20 @@ button {
 
 .controls button {
   flex: 1;
+}
+
+.randomize-row {
+  margin-top: 0.5rem;
+  display: flex;
+  gap: 0.5rem;
+}
+
+.randomize-row button {
+  max-width: 180px;
+}
+
+.randomize-row input {
+  max-width: 150px;
 }
 
 .player {
