@@ -43,7 +43,6 @@ label {
 }
 
 input, textarea, button, select {
-input, textarea, button {
   width: 100%;
   border-radius: 8px;
   border: 1px solid #49577f;
@@ -104,6 +103,16 @@ button {
 .player small {
   color: #bcc8f2;
 }
+
+.role-reference {
+  margin-bottom: 1rem;
+}
+
+.role-info {
+  margin-top: 0.6rem;
+  color: #d4defd;
+}
+
 
 .notes-row {
   display: flex;

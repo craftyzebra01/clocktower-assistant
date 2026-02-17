@@ -1,3 +1,5 @@
+const fs = require('fs');
+const path = require('path');
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
@@ -7,26 +9,92 @@ const server = http.createServer(app);
 const io = new Server(server);
 
 const PORT = process.env.PORT || 3000;
+const ROLES_FILE = path.join(__dirname, 'data', 'roles.yaml');
 
-const DEFAULT_ROLES = [
-  'Washerwoman',
-  'Librarian',
-  'Investigator',
-  'Chef',
-  'Empath',
-  'Fortune Teller',
-  'Undertaker',
-  'Monk',
-  'Ravenkeeper',
-  'Slayer',
-  'Soldier',
-  'Mayor',
-  'Poisoner',
-  'Spy',
-  'Scarlet Woman',
-  'Baron',
-  'Imp'
-];
+function normalizeYamlScalar(value) {
+  const trimmed = String(value || '').trim();
+  if (!trimmed) return '';
+
+  if (
+    (trimmed.startsWith('"') && trimmed.endsWith('"')) ||
+    (trimmed.startsWith("'") && trimmed.endsWith("'"))
+  ) {
+    return trimmed.slice(1, -1).trim();
+  }
+
+  return trimmed;
+}
+
+function parseRolesYaml(text) {
+  const lines = String(text || '').replace(/\r/g, '').split('\n');
+  const roleInfo = {};
+  const roles = [];
+
+  let currentName = '';
+
+  lines.forEach((line) => {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith('#') || trimmed === '---' || trimmed === '...') return;
+    if (trimmed === 'roles:' || trimmed === 'roles: []') return;
+
+    const nameMatch = trimmed.match(/^-\s*name\s*:\s*(.+)$/i) || trimmed.match(/^name\s*:\s*(.+)$/i);
+    if (nameMatch) {
+      currentName = normalizeYamlScalar(nameMatch[1]);
+      if (currentName && !roles.includes(currentName)) roles.push(currentName);
+      if (currentName && !roleInfo[currentName]) roleInfo[currentName] = { team: '', description: '' };
+      return;
+    }
+
+    const teamMatch = trimmed.match(/^team\s*:\s*(.+)$/i);
+    if (teamMatch && currentName) {
+      roleInfo[currentName] = {
+        ...roleInfo[currentName],
+        team: normalizeYamlScalar(teamMatch[1])
+      };
+      return;
+    }
+
+    const descriptionMatch = trimmed.match(/^description\s*:\s*(.+)$/i);
+    if (descriptionMatch && currentName) {
+      roleInfo[currentName] = {
+        ...roleInfo[currentName],
+        description: normalizeYamlScalar(descriptionMatch[1])
+      };
+      return;
+    }
+  });
+
+  for (const roleName of Object.keys(roleInfo)) {
+    const entry = roleInfo[roleName] || {};
+    const team = String(entry.team || '').trim();
+    const description = String(entry.description || '').trim();
+    if (!team && !description) {
+      delete roleInfo[roleName];
+    }
+  }
+
+  return { roles, roleInfo };
+}
+
+function loadRoleCatalog() {
+  const fallbackRoles = ['Washerwoman', 'Librarian', 'Investigator', 'Chef', 'Empath', 'Fortune Teller', 'Undertaker', 'Monk', 'Ravenkeeper', 'Slayer', 'Soldier', 'Mayor', 'Poisoner', 'Spy', 'Scarlet Woman', 'Baron', 'Imp'];
+
+  try {
+    const raw = fs.readFileSync(ROLES_FILE, 'utf8');
+    const parsed = parseRolesYaml(raw);
+    if (!parsed.roles.length) {
+      return { roles: fallbackRoles, roleInfo: {} };
+    }
+    return parsed;
+  } catch (error) {
+    console.warn(`Failed to load ${ROLES_FILE}: ${error.message}`);
+    return { roles: fallbackRoles, roleInfo: {} };
+  }
+}
+
+const ROLE_CATALOG = loadRoleCatalog();
+const DEFAULT_ROLES = ROLE_CATALOG.roles;
+const DEFAULT_ROLE_INFO = ROLE_CATALOG.roleInfo;
 
 const games = new Map();
 
@@ -73,6 +141,7 @@ function createGame(hostSocket, hostName, selectedRoles) {
     day: 0,
     selectedRoles: selectedRoles?.length ? selectedRoles : DEFAULT_ROLES.slice(0, 10),
     players: [],
+    roleInfo: { ...DEFAULT_ROLE_INFO },
     log: [{ ts: Date.now(), text: `${hostName} hosted the game.` }]
   };
 
@@ -80,7 +149,9 @@ function createGame(hostSocket, hostName, selectedRoles) {
   return game;
 }
 
-function serializeGame(game) {
+function serializeGame(game, viewerSocketId) {
+  const viewerIsHost = game.hostSocketId === viewerSocketId;
+
   return {
     id: game.id,
     hostSocketId: game.hostSocketId,
@@ -90,7 +161,8 @@ function serializeGame(game) {
     day: game.day,
     selectedRoles: game.selectedRoles,
     players: game.players,
-    log: game.log
+    roleInfo: game.roleInfo,
+    log: viewerIsHost ? game.log : []
   };
 }
 
@@ -115,7 +187,10 @@ function addPlayer(game, socketId, name) {
 }
 
 function broadcastState(game) {
-  io.to(game.id).emit('game:state', serializeGame(game));
+  game.players.forEach((player) => {
+    if (!player.socketId) return;
+    io.to(player.socketId).emit('game:state', serializeGame(game, player.socketId));
+  });
 }
 
 function hostOnly(socket, game) {

@@ -21,6 +21,8 @@ const els = {
   gameStatus: $('game-status'),
   gamePhase: $('game-phase'),
   roles: $('roles'),
+  roleInfoSelect: $('role-info-select'),
+  roleInfoDetails: $('role-info-details'),
   players: $('players'),
   log: $('log'),
   copyLink: $('copy-link'),
@@ -54,6 +56,54 @@ function isHost() {
   return state.game && state.game.hostSocketId === socket.id;
 }
 
+function roleDetailsFor(game, roleName) {
+  const details = game.roleInfo?.[roleName];
+  if (details && typeof details === 'object') {
+    return {
+      team: details.team || '',
+      description: details.description || ''
+    };
+  }
+
+  return {
+    team: '',
+    description: 'No description available for this role yet.'
+  };
+}
+
+function formatRoleDetails(game, roleName) {
+  const details = roleDetailsFor(game, roleName);
+  if (details.team && details.description) {
+    return `${details.team}: ${details.description}`;
+  }
+  if (details.description) {
+    return details.description;
+  }
+  return 'No description available for this role yet.';
+}
+
+function renderRoleInfo(game) {
+  const selectedRoles = game.selectedRoles || [];
+  const previousSelection = els.roleInfoSelect.value;
+
+  els.roleInfoSelect.innerHTML = selectedRoles
+    .map((role) => `<option value="${role}">${role}</option>`)
+    .join('');
+
+  const nextSelection = selectedRoles.includes(previousSelection)
+    ? previousSelection
+    : selectedRoles[0] || '';
+
+  els.roleInfoSelect.value = nextSelection;
+
+  if (!nextSelection) {
+    els.roleInfoDetails.textContent = 'No roles selected yet.';
+    return;
+  }
+
+  els.roleInfoDetails.textContent = formatRoleDetails(game, nextSelection);
+}
+
 function render() {
   const game = state.game;
   if (!game) return;
@@ -75,12 +125,17 @@ function render() {
     node.style.display = isHost() ? '' : 'none';
   });
 
+  renderRoleInfo(game);
+
   els.players.innerHTML = '';
   game.players.forEach((player) => {
     const wrapper = document.createElement('div');
     wrapper.className = `player ${player.alive ? '' : 'dead'}`;
 
-    const roleOptions = ['<option value="">-- no role --</option>', ...game.selectedRoles.map((r) => `<option value="${r}" ${player.role === r ? 'selected' : ''}>${r}</option>`)].join('');
+    const roleOptions = [
+      '<option value="">-- no role --</option>',
+      ...game.selectedRoles.map((r) => `<option value="${r}" ${player.role === r ? 'selected' : ''}>${r}</option>`)
+    ].join('');
 
     wrapper.innerHTML = `
       <strong>${player.name}</strong>
@@ -203,6 +258,12 @@ els.players.addEventListener('change', (event) => {
     { gameId: state.game.id, playerId, role: event.target.value },
     callbackStatus
   );
+});
+
+els.roleInfoSelect.addEventListener('change', () => {
+  const roleName = els.roleInfoSelect.value;
+  if (!roleName || !state.game) return;
+  els.roleInfoDetails.textContent = formatRoleDetails(state.game, roleName);
 });
 
 els.addLog.addEventListener('click', () => {
