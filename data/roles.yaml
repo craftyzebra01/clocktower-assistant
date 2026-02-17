@@ -1,0 +1,52 @@
+roles:
+  - name: Washerwoman
+    team: Townsfolk
+    description: "You start knowing that 1 of 2 players is a particular Townsfolk."
+  - name: Librarian
+    team: Townsfolk
+    description: "You start knowing that 1 of 2 players is a particular Outsider (or that there are zero Outsiders)."
+  - name: Investigator
+    team: Townsfolk
+    description: "You start knowing that 1 of 2 players is a particular Minion."
+  - name: Chef
+    team: Townsfolk
+    description: "You start knowing how many pairs of evil players sit next to each other."
+  - name: Empath
+    team: Townsfolk
+    description: "Each night, you learn how many of your 2 alive neighbors are evil."
+  - name: Fortune Teller
+    team: Townsfolk
+    description: "Each night, choose 2 players. You learn if either is a Demon (with a possible red herring)."
+  - name: Undertaker
+    team: Townsfolk
+    description: "Each night, you learn which character died by execution today."
+  - name: Monk
+    team: Townsfolk
+    description: "Each night, choose a player (not yourself) to protect from the Demon tonight."
+  - name: Ravenkeeper
+    team: Townsfolk
+    description: "If you die at night, you are woken to choose a player and learn their character."
+  - name: Slayer
+    team: Townsfolk
+    description: "Once per game during the day, publicly choose a player. If they are the Demon, they die."
+  - name: Soldier
+    team: Townsfolk
+    description: "You are safe from the Demon at night."
+  - name: Mayor
+    team: Townsfolk
+    description: "If only 3 players live and no one is executed, your team wins. You might die instead of someone else at night."
+  - name: Poisoner
+    team: Minion
+    description: "Each night, choose a player; they are poisoned tonight and tomorrow day."
+  - name: Spy
+    team: Minion
+    description: "Each night, you see the grimoire. You might register as good and as a Townsfolk/Outsider."
+  - name: Scarlet Woman
+    team: Minion
+    description: "If there are 5+ players alive and the Demon dies, you become the Demon."
+  - name: Baron
+    team: Minion
+    description: "There are extra Outsiders in play."
+  - name: Imp
+    team: Demon
+    description: "Each night, choose a player; they die. If you kill yourself this way, a Minion can become the Imp."

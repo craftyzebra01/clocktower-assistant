@@ -60,19 +60,25 @@
               <input id="player-count" type="number" min="1" max="20" placeholder="Player count" />
               <button id="randomize-pool">Randomize Pool</button>
             </div>
-            <button id="save-roles" class="host-only">Save Roles</button>
           </div>
+        </div>
+
+        <h3>Role Reference</h3>
+        <div class="role-reference">
+          <label for="role-info-select">Choose a role</label>
+          <select id="role-info-select"></select>
+          <p id="role-info-details" class="role-info"></p>
         </div>
 
         <h3>Players</h3>
         <div id="players"></div>
 
-        <h3>Storyteller Notes</h3>
+        <h3 class="host-only">Storyteller Notes</h3>
         <div class="notes-row host-only">
           <input id="log-input" placeholder="Add note: nominations, executions, reminders..." />
           <button id="add-log">Add</button>
         </div>
-        <ul id="log"></ul>
+        <ul id="log" class="host-only"></ul>
       </section>
     </main>
 
